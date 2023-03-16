@@ -57,21 +57,26 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-let appName, appPath, cdkVersion, accountNumber, region;
+const options = {};
 
 const askQuestion = (question) =>
   new Promise((resolve) => rl.question(question, resolve));
 
-const gatherInfoForElasticBeanstalkDeployment = async () => {
-  appName = await askQuestion(
-    "What is the name of your app? App name must be minimum length 1, maximum length 100."
+const deploymentQuestionnaire = async () => {
+  options.appName = await askQuestion(
+    "What is the name of your app? App name must be minimum length 1, maximum length 100. "
   );
 
-  appPath = await askQuestion("Provide the folder path for your app. ");
+  options.appPath = await askQuestion("Provide the folder path for your app. ");
 
-  cdkVersion = await askQuestion("Choose your CDK version.");
+  options.accountNumber = await askQuestion("Enter your AWS account number. ");
 
-  accountNumber = await askQuestion("Enter your AWS account number.");
+  options.region = await askQuestion("Enter the AWS region you wish to use. ");
 
-  region = await askQuestion("Enter the AWS region you wish to use.");
+  console.log("Here is what you have entered: ");
+  console.log(options);
+
+  rl.close();
 };
+
+deploymentQuestionnaire();
