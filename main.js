@@ -49,3 +49,29 @@
 
 4. Run "cdk deploy"
 */
+
+const readline = require("readline");
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+let appName, appPath, cdkVersion, accountNumber, region;
+
+const askQuestion = (question) =>
+  new Promise((resolve) => rl.question(question, resolve));
+
+const gatherInfoForElasticBeanstalkDeployment = async () => {
+  appName = await askQuestion(
+    "What is the name of your app? App name must be minimum length 1, maximum length 100."
+  );
+
+  appPath = await askQuestion("Provide the folder path for your app. ");
+
+  cdkVersion = await askQuestion("Choose your CDK version.");
+
+  accountNumber = await askQuestion("Enter your AWS account number.");
+
+  region = await askQuestion("Enter the AWS region you wish to use.");
+};
