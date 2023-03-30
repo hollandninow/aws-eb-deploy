@@ -57,9 +57,10 @@
 */
 
 const utils = require('./utils');
+const powershellHelper = require('./powershellHelper');
 
 const readline = require('readline');
-const { exec, execSync } = require('child_process');
+const { exec } = require('child_process');
 const fse = require('fs-extra');
 
 const rl = readline.createInterface({
@@ -86,49 +87,17 @@ const main = async () => {
   const appDestinationPath = `${elasticBeanstalkFolder}/${appName}`;
   fse.copySync(appSourcePath, appDestinationPath);
 
-  // const files = execSync('powershell ls').toString();
-  // console.log(files);
+  // 1a. Run the following:
+  //  i.    npm install -g cdk@1.180.0
+  //  ii.   npm i —save-exact @aws-cdk/aws-s3-assets@1.180.0
+  //  iii.  npm i —save-exact @aws-cdk/aws-elasticbeanstalk@1.180.0
+  //  iv.   npm i —save-exact @aws-cdk/aws-iam@1.180.0
+  await powershellHelper.runMultiplePowershellCmd(appDestinationPath, [
+    'npm install -g cdk@1.180.0',
+    'npm i --save-exact @aws-cdk/aws-s3-assets@1.180.0',
+    'npm i --save-exact @aws-cdk/aws-elasticbeanstalk@1.180.0',
+    'npm i --save-exact @aws-cdk/aws-iam@1.180.0',
+  ]);
 };
 
 main();
-
-// console.log('mkdir test');
-// exec('powershell mkdir test', (error, stdout, stderr) => {
-//   if (error) {
-//     console.error(`exec error: ${error}`);
-//     return;
-//   }
-//   console.log(`stdout: ${stdout}`);
-//   console.error(`stderr: ${stderr}`);
-// });
-
-// exec('powershell cd node_modules', (error, stdout, stderr) => {
-//   if (error) {
-//     console.error(`exec error: ${error}`);
-//     return;
-//   }
-//   console.log(`stdout: ${stdout}`);
-//   console.error(`stderr: ${stderr}`);
-// });
-
-// exec('powershell Get-ChildItem', (error, stdout, stderr) => {
-//   if (error) {
-//     console.error(`exec error: ${error}`);
-//     return;
-//   }
-//   console.log(`stdout: ${stdout}`);
-//   console.error(`stderr: ${stderr}`);
-// });
-
-// try {
-//   execSync('powershell mkdir test');
-
-//   execSync('powershell cd test');
-
-//   const childItem = execSync('powershell Get-ChildItem');
-//   console.log(childItem.toString());
-
-//   execSync('powershell Remove-Item './test'');
-// } catch (err) {
-//   console.log(`exec error: ${err}`);
-// }
