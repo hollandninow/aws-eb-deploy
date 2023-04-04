@@ -1,3 +1,6 @@
+const fs = require('fs');
+const archiver = require('archiver');
+
 // Accepts a question (string) and rl (readline)
 const askQuestion = (question, rl) =>
   new Promise((resolve) => rl.question(question, resolve));
@@ -31,4 +34,32 @@ exports.getDeploymentParametersFromUser = async (rl) => {
   rl.close();
 
   return deployParams;
+};
+
+// Zips the app, but excludes /node_modules and /cdk-eb-infra
+exports.zipDirectory = async (source, destination) => {
+  const archive = archiver('zip', { zlib: { level: 9 } });
+  const output = fs.createWriteStream(destination);
+
+  archive.on('error', (err) => {
+    throw err;
+  });
+
+  output.on('close', () => {
+    console.log(archive.pointer() + ' total bytes');
+    console.log(
+      'Archiver has been finalized and the output file descriptor has closed.'
+    );
+  });
+
+  archive.pipe(output);
+
+  archive.glob('**/*', {
+    cwd: source,
+    dot: true,
+    ignore: ['cdk-eb-infra/**', 'node_modules/**'],
+    matchBase: true,
+  });
+
+  await archive.finalize();
 };

@@ -39,7 +39,9 @@ iv. npm i —save-exact @aws-cdk/aws-iam@1.180.0
 
 1d. Initialize CDK application using 'cdk init app --language javascript'
 
-1e. In /lib/cdk-eb-infra-stack.js, replace existing code and paste code from ./cdk-eb-infra-stack.js and substitute %APP_NAME% for APP_NAME requested in 1a.
+1e. Do the following:
+i. Copy cdk-eb-infra-stack.js in ./cdk-eb-infra-stack and replace the same named file in the target app under /test-app/cdk-eb-infra/lib
+ii. Substitute %APP_NAME% for APP_NAME requested in 1a.
 
 1f. Run the following while in directory 'cdk-eb-infra'
 i. npm i @aws-cdk/aws-s3-assets
