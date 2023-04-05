@@ -2,9 +2,11 @@ const utils = require('./utils');
 const powershellHelper = require('./powershellHelper');
 
 const readline = require('readline');
-const { exec } = require('child_process');
 const fse = require('fs-extra');
 const replace = require('replace-in-file');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: './config.env' });
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -60,7 +62,7 @@ const main = async () => {
   );
 
   // Acknowledge notice 19836 to not clutter up every command going forward
-  // await powershellHelper.runPowershellCmd(cdkPath, 'cdk acknowledge 19836');
+  await powershellHelper.runPowershellCmd(cdkPath, 'cdk acknowledge 19836');
 
   // 1e.i. Copy cdk-eb-infra-stack.js in ./cdk-eb-infra-stack and replace the same named file in the target app under /test-app/cdk-eb-infra/lib
   fse.copyFileSync(
@@ -91,9 +93,19 @@ const main = async () => {
   ]);
 
   // 2. Zip the Node.js app as 'app.zip' into 'cdk-eb-infra' folder.
-  //   i. Move all files and folders except 'cdk-eb-infra' and 'node_modules' to 'zip-target'.
-  //   ii. Zip all contents of 'zip-target' and save to 'cdk-eb-infra'
   await utils.zipDirectory(appDestinationPath, `${cdkPath}/app.zip`);
+
+  // 3. Bootstrap account using AWS_ACCOUNT_NUMBER and AWS_REGION in the command 'cdk bootstrap aws://AWS_ACCOUNT_NUMBER/AWS_REGION'
+  await powershellHelper.runPowershellCmd(
+    cdkPath,
+    `cdk bootstrap aws://${accountNumber}/${region}`
+  );
+
+  // 4. Run 'cdk deploy'
+  await powershellHelper.runPowershellCmd(
+    cdkPath,
+    'cdk deploy --require-approval never'
+  );
 };
 
 main();
