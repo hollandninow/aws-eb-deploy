@@ -1,4 +1,5 @@
-const fs = require('fs');
+const fse = require('fs');
+const glob = require('glob');
 const archiver = require('archiver');
 
 // Accepts a question (string) and rl (readline)
@@ -39,7 +40,7 @@ exports.getDeploymentParametersFromUser = async (rl) => {
 // Zips the app, but excludes /node_modules and /cdk-eb-infra
 exports.zipDirectory = async (source, destination) => {
   const archive = archiver('zip', { zlib: { level: 9 } });
-  const output = fs.createWriteStream(destination);
+  const output = fse.createWriteStream(destination);
 
   archive.on('error', (err) => {
     throw err;
@@ -62,4 +63,42 @@ exports.zipDirectory = async (source, destination) => {
   });
 
   await archive.finalize();
+};
+
+exports.copyAppFolder = async (source, destination, excludeDirsArray) => {
+  let excludeDirsStr = '{';
+  excludeDirsArray.forEach((dir, i) => {
+    excludeDirsStr =
+      i === 0 ? `${excludeDirsStr}${dir}` : `${excludeDirsStr},${dir}`;
+  });
+
+  excludeDirsStr = excludeDirsStr + '}';
+
+  console.log(excludeDirsStr);
+
+  let files;
+  try {
+    files = await glob('**/*', {
+      cwd: source,
+      ignore: ['node_modules/**', '.cache/**'],
+    });
+  } catch (err) {
+    throw err;
+  }
+
+  console.log(files);
+
+  fse.mkdirSync(destination);
+
+  files.forEach((file) => {
+    // console.log(file);
+    const sourceFile = `${source}/${file}`;
+    const destFile = `${destination}/${file}`;
+
+    if (!file.includes('.')) {
+      fse.mkdirSync(destFile);
+    } else {
+      fse.copyFileSync(sourceFile, destFile);
+    }
+  });
 };
